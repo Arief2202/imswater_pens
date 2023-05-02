@@ -4,11 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' show jsonDecode;
+import 'dart:convert' show jsonEncode;
 import 'package:monitor_gas/global_var.dart' as globals;
 import 'dart:async';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'notification.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
 
 class Dashboard extends StatefulWidget
 {
@@ -29,11 +35,12 @@ class DashboardState extends State<Dashboard>
   
   void initState() {
     super.initState();
+    notif.initialize(flutterLocalNotificationsPlugin);
     timer = Timer.periodic(Duration(milliseconds: 500), (Timer t) => updateValue());
   }
   void updateValue() async{
     var url = Uri.parse(globals.api + "/readData.php");
-    final response = await http.get(url);
+    var response = await http.get(url);
     if (response.statusCode == 200) {
         // final data = jsonDecode(response.body)[0];
         Map<String, dynamic> data = jsonDecode(response.body);
@@ -47,6 +54,27 @@ class DashboardState extends State<Dashboard>
             gas3 = data['data_latest']['gas3'];
             ph1 = data['data_latest']['ph1'];
           });
+        }
+    }
+    
+    url = Uri.parse(globals.api + "/readNotif.php");
+    response = await http.get(url);
+    if (response.statusCode == 200) {
+        // final data = jsonDecode(response.body)[0];
+        Map<String, dynamic> data = jsonDecode(response.body);
+        if (this.mounted) {
+          if(data['data_oldest'] != null){
+            response = await http.post(
+              Uri.parse(globals.api + "/postNotif.php"),
+              headers: <String, String>{
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+              },
+              body: "id="+data['data_oldest']['id'],
+            );
+            if(response.statusCode == 200){
+              notif.showNotif(id: int.parse(data['data_oldest']['id']), body: data['data_oldest']['message'], fln: flutterLocalNotificationsPlugin);
+            }
+          }
         }
     }
   }
@@ -111,13 +139,6 @@ class DashboardState extends State<Dashboard>
                   ],
                 ).show();
 
-                // Navigator.pop(context);
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) {
-                //     return Dashboard();
-                //   }),
-                // );
               })
         ],
       ),
@@ -127,43 +148,6 @@ class DashboardState extends State<Dashboard>
         mainAxisSpacing: 12.0,
         padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         children: <Widget>[
-          // _buildTile(
-          //   Padding
-          //   (
-          //     padding: const EdgeInsets.all(24.0),
-          //     child: Row
-          //     (
-          //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //       crossAxisAlignment: CrossAxisAlignment.center,
-          //       children: <Widget>
-          //       [
-          //         Column
-          //         (
-          //           mainAxisAlignment: MainAxisAlignment.center,
-          //           crossAxisAlignment: CrossAxisAlignment.start,
-          //           children: <Widget>
-          //           [
-          //             Text('Humidity 3', style: TextStyle(color: Colors.blueAccent)),
-          //             Text(global.humidity3 + ' %', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w700, fontSize: 28.0))
-          //           ],
-          //         ),
-          //         Material
-          //         (
-          //           color: Colors.blue,
-          //           borderRadius: BorderRadius.circular(24.0),
-          //           child: Center
-          //           (
-          //             child: Padding
-          //             (
-          //               padding: const EdgeInsets.all(16.0),
-          //               child: Icon(Icons.water_damage_outlined, color: Colors.white, size: 30.0),
-          //             )
-          //           )
-          //         )
-          //       ]
-          //     ),
-          //   ),
-          // ),
           myCard("Suhu 1", suhu1 + ' °C', Icon(Icons.thermostat, color: Colors.white, size: 30.0)),
           myCard("Suhu 2", suhu2 + ' °C', Icon(Icons.thermostat, color: Colors.white, size: 30.0)),
           myCard("Suhu 3", suhu3 + ' °C', Icon(Icons.thermostat, color: Colors.white, size: 30.0)),

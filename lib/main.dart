@@ -12,6 +12,10 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'package:monitor_gas/global_var.dart' as globals;
 import 'package:http/http.dart' as http;
 import 'dart:convert' show jsonDecode;
+import 'notification.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
 void main() {
   runApp(
@@ -51,6 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    notif.initialize(flutterLocalNotificationsPlugin);
     autoLogIn();
   }
 
