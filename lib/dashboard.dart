@@ -5,7 +5,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' show jsonDecode;
 import 'dart:convert' show jsonEncode;
-import 'package:monitor_gas/global_var.dart' as globals;
+import 'package:imswater/global_var.dart' as globals;
 import 'dart:async';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
@@ -71,6 +71,7 @@ class DashboardState extends State<Dashboard>
               },
               body: "id="+data['data_oldest']['id'],
             );
+            print(response.body);
             if(response.statusCode == 200){
               notif.showNotif(id: int.parse(data['data_oldest']['id']), body: data['data_oldest']['message'], fln: flutterLocalNotificationsPlugin);
             }

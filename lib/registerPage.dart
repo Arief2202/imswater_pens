@@ -4,7 +4,7 @@ import 'dart:convert' show jsonDecode;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
-import 'package:monitor_gas/global_var.dart' as globals;
+import 'package:imswater/global_var.dart' as globals;
 
 class RegisterPage extends StatefulWidget {
   RegisterPage({Key? key}) : super(key: key);
